@@ -144,3 +144,14 @@ def delete_payment(db: Session, payment_id: int) -> bool:
     db.delete(obj)
     db.commit()
     return True
+
+def update_order_status(db: Session, order_id: int, status_id: int) -> bool:
+    order = get_order(db, order_id)
+    if not order:
+        return False
+
+    order.status_id = status_id
+    db.commit()
+    db.refresh(order)
+    return True
+

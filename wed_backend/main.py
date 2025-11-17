@@ -6,20 +6,21 @@ from typing import List
 from database import SessionLocal, engine
 import models, schemas, crud
 
-# Create tables if not exist
+# Create DB tables if not exist
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Laundry Shop API")
 
-# CORS (open in dev, can restrict later)
+# ------------------- CORS -------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],        # allow all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ------------------- DB ---------------------
 def get_db():
     db = SessionLocal()
     try:
@@ -27,16 +28,12 @@ def get_db():
     finally:
         db.close()
 
-
-# ---------- Health ----------
-
+# ------------------- Health -----------------
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
-
-# ---------- Customers ----------
-
+# ------------------- CUSTOMERS ---------------
 @app.get("/customers", response_model=List[schemas.Customer])
 def list_customers(db: Session = Depends(get_db)):
     return crud.get_customers(db)
@@ -77,9 +74,7 @@ def delete_customer(customer_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Customer not found")
     return {"message": "Customer deleted"}
 
-
-# ---------- Services ----------
-
+# ------------------- SERVICES ----------------
 @app.get("/services", response_model=List[schemas.Service])
 def list_services(db: Session = Depends(get_db)):
     return crud.get_services(db)
@@ -88,16 +83,12 @@ def list_services(db: Session = Depends(get_db)):
 def create_service(payload: schemas.ServiceCreate, db: Session = Depends(get_db)):
     return crud.create_service(db, payload)
 
-
-# ---------- Statuses ----------
-
+# ------------------- STATUSES ----------------
 @app.get("/statuses", response_model=List[schemas.Status])
 def list_statuses(db: Session = Depends(get_db)):
     return crud.get_statuses(db)
 
-
-# ---------- Orders ----------
-
+# ------------------- ORDERS ------------------
 @app.get("/orders", response_model=List[schemas.Order])
 def list_orders(db: Session = Depends(get_db)):
     return crud.get_orders(db)
@@ -128,23 +119,17 @@ def update_order(
         raise HTTPException(status_code=404, detail="Order not found")
     return order
 
-@app.patch("/orders/{order_id}/status", response_model=schemas.Order)
-def update_order_status(order_id: int, status_id: int, db: Session = Depends(get_db)):
-    order = crud.update_order(db, order_id, schemas.OrderUpdate(status_id=status_id))
-    if not order:
+# -------------- FIXED STATUS ENDPOINT -----------------
+# ❗ Your frontend uses PUT + JSON body → THIS is the correct endpoint.
+@app.put("/orders/{order_id}/status")
+def update_order_status(order_id: int, payload: dict, db: Session = Depends(get_db)):
+    status_id = payload.get("status_id")
+    updated = crud.update_order_status(db, order_id, status_id)
+    if not updated:
         raise HTTPException(status_code=404, detail="Order not found")
-    return order
+    return {"message": "Status updated"}
 
-@app.delete("/orders/{order_id}")
-def delete_order(order_id: int, db: Session = Depends(get_db)):
-    ok = crud.delete_order(db, order_id)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return {"message": "Order deleted"}
-
-
-# ---------- Order Items ----------
-
+# ------------------- ORDER ITEMS -----------------------
 @app.get("/order_items", response_model=List[schemas.OrderItem])
 def list_order_items(db: Session = Depends(get_db)):
     return crud.get_order_items(db)
@@ -164,9 +149,7 @@ def delete_order_item(item_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order item not found")
     return {"message": "Order item deleted"}
 
-
-# ---------- Payments ----------
-
+# ------------------- PAYMENTS --------------------------
 @app.get("/payments", response_model=List[schemas.Payment])
 def list_payments(db: Session = Depends(get_db)):
     return crud.get_payments(db)
@@ -185,3 +168,70 @@ def delete_payment(payment_id: int, db: Session = Depends(get_db)):
     if not ok:
         raise HTTPException(status_code=404, detail="Payment not found")
     return {"message": "Payment deleted"}
+
+# ------------------- DASHBOARD STATS --------------------
+from sqlalchemy import func
+
+@app.get("/stats/summary")
+def stats_summary(db: Session = Depends(get_db)):
+    total_orders = db.query(models.Order).count()
+
+    total_revenue = db.query(func.sum(models.Payment.amount)).scalar() or 0
+
+    today = func.date(func.now())
+    today_revenue = (
+        db.query(func.sum(models.Payment.amount))
+        .filter(func.date(models.Payment.pay_datetime) == today)
+        .scalar()
+        or 0
+    )
+
+    pending = db.query(models.Order).filter(models.Order.status_id == 1).count()
+    washing = db.query(models.Order).filter(models.Order.status_id == 2).count()
+    drying = db.query(models.Order).filter(models.Order.status_id == 3).count()
+    ironing = db.query(models.Order).filter(models.Order.status_id == 4).count()
+    ready = db.query(models.Order).filter(models.Order.status_id == 5).count()
+    picked_up = db.query(models.Order).filter(models.Order.status_id == 6).count()
+
+    return {
+        "total_orders": total_orders,
+        "total_revenue": total_revenue,
+        "today_revenue": today_revenue,
+        "pending": pending,
+        "washing": washing,
+        "drying": drying,
+        "ironing": ironing,
+        "ready": ready,
+        "picked_up": picked_up,
+    }
+
+
+@app.get("/stats/orders_by_status")
+def stats_orders_by_status(db: Session = Depends(get_db)):
+    rows = (
+        db.query(models.Status.status_name, func.count(models.Order.order_id))
+        .join(models.Order, models.Status.status_id == models.Order.status_id)
+        .group_by(models.Status.status_name)
+        .all()
+    )
+
+    return [{"status": r[0], "count": r[1]} for r in rows]
+
+
+@app.get("/stats/revenue_7_days")
+def stats_revenue_last7(db: Session = Depends(get_db)):
+    rows = (
+        db.query(
+            func.date(models.Payment.pay_datetime),
+            func.sum(models.Payment.amount)
+        )
+        .group_by(func.date(models.Payment.pay_datetime))
+        .order_by(func.date(models.Payment.pay_datetime).desc())
+        .limit(7)
+        .all()
+    )
+
+    return [
+        {"date": str(row[0]), "amount": row[1] or 0}
+        for row in rows
+    ]
