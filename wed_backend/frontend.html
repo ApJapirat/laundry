@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laundry API Tester</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f7f7f7; }
+    h1 { margin-bottom: 10px; }
+    button { padding: 10px 15px; margin: 5px 0; cursor: pointer; }
+    pre { background: #222; color: #0f0; padding: 15px; border-radius: 8px; white-space: pre-wrap; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🧺 Laundry API Frontend Tester</h1>
+  <p>Test your FastAPI backend with one click.</p>
+
+  <div class="card">
+    <h2>GET /customers</h2>
+    <button onclick="getCustomers()">Load Customers</button>
+    <pre id="customersOutput">(waiting...)</pre>
+  </div>
+
+  <div class="card">
+    <h2>GET /orders</h2>
+    <button onclick="getOrders()">Load Orders</button>
+    <pre id="ordersOutput">(waiting...)</pre>
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    async function getCustomers() {
+      document.getElementById("customersOutput").textContent = "Loading...";
+      try {
+        const res = await fetch(`${API}/customers`);
+        const data = await res.json();
+        document.getElementById("customersOutput").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("customersOutput").textContent = "ERROR: " + err;
+      }
+    }
+
+    async function getOrders() {
+      document.getElementById("ordersOutput").textContent = "Loading...";
+      try {
+        const res = await fetch(`${API}/orders`);
+        const data = await res.json();
+        document.getElementById("ordersOutput").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("ordersOutput").textContent = "ERROR: " + err;
+      }
+    }
+  </script>
+</body>
+</html>
