@@ -128,6 +128,7 @@ laundry/
 cd wed_backend
 pip install -r requirements.txt
 uvicorn main:app --reload
+'''
 
 ## Backend will run at:
     http://localhost:8000
@@ -162,4 +163,5 @@ This project is a collaboration focused on learning:
 - Styling with CSS variables and reusable themes  
 
 Thanks to both developers for creating a clean, modern and complete laundry management system.
+
 
