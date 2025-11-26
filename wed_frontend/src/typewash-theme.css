@@ -1,0 +1,345 @@
+/* ===========================================================
+   THEME TOKENS – แก้สี / mood หลักของทั้งเว็บตรงนี้
+   =========================================================== */
+
+:root {
+  /* พื้นหลังหลักของระบบ */
+  --bg: #0d0d12;          /* สีพื้นหลังนอกสุด (body / layout) */
+  --bg-alt: #15151e;      /* พื้นหลังของ card / table / surface ต่าง ๆ */
+  --bg-soft: #1b1b26;     /* พื้นหลังของ input / ช่องฟอร์ม / hover อ่อน ๆ */
+
+  /* ข้อความ */
+  --text: #e5e5ea;        /* สีข้อความหลัก */
+  --text-muted: #8f8fa3;  /* สีข้อความรอง / label / header table */
+
+  /* สี accent ส้มโทน Monkeytype */
+  --accent: #ff8a3d;                        /* สีหลักสำหรับปุ่ม / bar chart / line */
+  --accent-soft: rgba(255, 138, 61, 0.15);  /* ใช้เป็นพื้นหลังอ่อน ๆ เวลา active */
+
+  /* เส้นขอบ + รูปทรง */
+  --border: #262631;       /* สีเส้นขอบของ card / table / sidebar */
+  --radius: 10px;          /* ความโค้งของมุมการ์ด / ปุ่ม / input */
+}
+
+/* ===========================================================
+   GLOBAL – reset พื้นฐานทั้งเว็บ
+   =========================================================== */
+
+body,
+html {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  margin: 0;
+  font-family: system-ui, sans-serif !important;
+  height: 100%;
+}
+
+a {
+  color: var(--accent) !important;
+  text-decoration: none;
+}
+
+/* layout หลักที่ครอบ sidebar + main */
+
+.layout {
+  display: flex;
+  background: var(--bg) !important;
+  height: 100vh;
+}
+
+/* ===========================================================
+   SIDEBAR – แถบเมนูด้านซ้าย
+   =========================================================== */
+
+.sidebar {
+  width: 240px !important;
+  background: #020617 !important; /* Dark navy black ให้ฟีล Monkeytype */
+  border-right: 1px solid var(--border) !important;
+  padding: 20px !important;
+  color: var(--text) !important;
+}
+
+.sidebar h2 {
+  color: var(--text) !important;
+  margin-bottom: 24px !important;
+}
+
+.sidebar a {
+  display: block;
+  padding: 10px 16px !important;
+  border-radius: var(--radius) !important;
+  color: var(--text-muted) !important;
+  transition: 0.15s ease;
+  font-size: 14px;
+}
+
+.sidebar a:hover {
+  background: var(--bg-soft) !important;
+  color: var(--text) !important;
+}
+
+.sidebar a.active {
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
+}
+
+/* ============================
+   SIDEBAR MONKEYTYPE-STYLE (ปุ่มเป็น pill เด้ง ๆ)
+   ============================ */
+
+.sidebar-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 24px;
+  color: #f9fafb;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ปุ่มเมนูแต่ละอัน ฟีลคล้ายการ์ด Monkeytype */
+
+.sidebar-link {
+  display: block;
+  padding: 10px 16px;
+  border-radius: 999px;                 /* pill */
+  font-size: 14px;
+  font-weight: 500;
+
+  background: #020617;
+  color: var(--text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* hover ให้ดูเด้งขึ้นมานิด ๆ */
+.sidebar-link:hover {
+  background: #111827;
+  color: var(--text);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.7);
+}
+
+/* อันที่ active → เหลือง/ส้มแบบ Monkeytype */
+.sidebar-link.active {
+  background: #ffb000;
+  color: #111827;
+  border-color: #fbbf24;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.85);
+}
+
+/* ===========================================================
+   MAIN CONTENT – พื้นที่เนื้อหาหลักด้านขวา
+   =========================================================== */
+
+.main {
+  flex: 1 !important;
+  padding: 24px !important;
+  background: radial-gradient(
+      circle at top,
+      #26263a 0,
+      #121218 45%,
+      #060608 100%
+    ) !important;
+  color: var(--text) !important;
+  overflow-y: auto;
+}
+
+.page-title,
+h1,
+h2,
+h3,
+h4 {
+  color: var(--text) !important;
+  margin-bottom: 16px !important;
+  font-weight: 600;
+}
+
+/* ===========================================================
+   CARDS – กล่อง Summary / การ์ดต่าง ๆ
+   =========================================================== */
+
+.card,
+.summary-card {
+  background: var(--bg-alt) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45) !important;
+  color: var(--text) !important;
+}
+
+.summary-card h3,
+.summary-card p {
+  color: var(--text) !important;
+}
+
+/* ===========================================================
+   TABLES – ตาราง Orders / Customers ฯลฯ
+   =========================================================== */
+
+table {
+  width: 100%;
+  border-collapse: collapse !important;
+  background: var(--bg-alt) !important;
+  color: var(--text) !important;
+  border-radius: var(--radius) !important;
+  overflow: hidden !important;
+  border: 1px solid var(--border) !important;
+}
+
+thead tr {
+  background: #1c1c27 !important;
+}
+
+thead th {
+  padding: 12px !important;
+  text-align: left !important;
+  font-size: 13px !important;
+  color: var(--text-muted) !important;
+}
+
+tbody td {
+  padding: 10px 12px !important;
+  border-bottom: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+tbody tr:hover {
+  background: #22222e !important;
+}
+
+/* ===========================================================
+   FORMS – input / select / textarea
+   =========================================================== */
+
+input,
+select,
+textarea {
+  width: 100%;
+  background: var(--bg-soft) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  padding: 10px !important;
+  border-radius: var(--radius) !important;
+  margin-bottom: 12px !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent) !important;
+  outline: none !important;
+}
+
+/* ===========================================================
+   BUTTONS – ปุ่มทั้งหมดในระบบ
+   =========================================================== */
+
+button,
+.btn {
+  background: var(--accent) !important;
+  border: none !important;
+  border-radius: var(--radius) !important;
+  color: #0d0d0d !important;
+  padding: 10px 18px !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  transition: 0.15s ease !important;
+}
+
+button:hover,
+.btn:hover {
+  background: #ff9c55 !important;
+}
+
+/* ===========================================================
+   CHART OVERRIDES – สไตล์ Recharts
+   =========================================================== */
+
+.recharts-text {
+  fill: var(--text-muted) !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: var(--text-muted) !important;
+}
+
+.recharts-legend-item-text {
+  color: var(--text-muted) !important;
+}
+
+/* Bar graph */
+.recharts-bar-rect {
+  fill: var(--accent) !important;
+}
+
+/* Line graph */
+.recharts-line path {
+  stroke: var(--accent) !important;
+}
+
+/* Pie chart slice */
+.recharts-pie-sector {
+  stroke: var(--bg) !important;
+  stroke-width: 2 !important;
+}
+
+/* ===== PIE LABEL: STATUS + NUMBER ===== */
+
+.recharts-pie-label,
+.recharts-pie-label-text {
+  /* ทำให้ตัวหนังสือมีขอบมืด อ่านง่ายบนพื้นสีจัด */
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.85);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+
+  text-shadow:
+    0px 0px 4px rgba(0, 0, 0, 0.9),
+    0px 0px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== TOOLTIP (ทุกกราฟ) ===== */
+
+.recharts-default-tooltip {
+  background-color: #14161a !important;
+  border: 1px solid #1f2127 !important;
+  border-radius: 8px !important;
+  color: #f9fafb !important;
+}
+
+.recharts-tooltip-label,
+.recharts-tooltip-item {
+  color: #f9fafb !important;
+}
+
+/* ===========================================================
+   MISC – ของเล็ก ๆ ทั่วไป
+   =========================================================== */
+
+hr {
+  border-color: var(--border) !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2c2c38;
+  border-radius: 50px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a48;
+}

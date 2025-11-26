@@ -1,16 +1,61 @@
-# React + Vite
+Laundry Admin – TypeWash Theme
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern and responsive admin dashboard for managing laundry shop operations.
+Built with React + Vite and styled using a custom TypeWash.
 
-Currently, two official plugins are available:
+🚀 Tech Stack
+    -React + Vite
+    -React Router
+    -Recharts (bar, line, pie charts)
+    -Custom CSS Theme (typewash-theme.css)
+    -Axios / Fetch API
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+📌 Features
+    Dashboard
+        -Total orders
+        -Revenue overview
+        -Status distribution charts
+        -7-day revenue line graph
+        -Pending orders & today's pickup list
+    Customers
+        -Add new customer
+        -View customer list
+    Orders
+        -Create new order
+        -Manage order details
+        -Update laundry status (pending → washing → drying → ironing → ready → picked_up)
+        -View dropoff & pickup-due timestamps
 
-## React Compiler
+🛠️ Project Setup
+    Install dependencies
+        npm install
+    Run development server
+        npm run dev
+    The app will be available at:
+        http://localhost:5173
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+🎨 Theme
+    This project uses a fully custom CSS theme:
+        src/typewash-theme.css
+    Inspired by Monkeytype, using:
+        -dark gradients
+        -orange accent
+        -soft shadows 
+        -rounded surfaces
+        -high-contrast charts
+    Easy to modify through centralized CSS variables.
 
-## Expanding the ESLint configuration
+📂 Folder Structure
+    src/
+        pages/
+        layout/
+        services/
+        assets/
+        typewash-theme.css
+        App.jsx
+        main.jsx
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+✔️ Status
+    -Works fully with mock API
+    -Frontend ready to integrate with real backend
+    -Clean, modern UI designed for real shop usage

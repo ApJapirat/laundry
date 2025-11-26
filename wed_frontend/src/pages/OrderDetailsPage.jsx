@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { API } from "../services/api";
 import { useParams } from "react-router-dom";
 
-// Color for each status
+// สีของแต่ละ status
 const statusColors = {
   pending: "#f4c542",
   washing: "#409eff",
@@ -18,7 +18,7 @@ export default function OrderDetailsPage() {
   const [order, setOrder] = useState(null);
   const [statuses, setStatuses] = useState([]);
 
-  // Payment form states
+  // payment form
   const [payAmount, setPayAmount] = useState("");
   const [payMethod, setPayMethod] = useState("cash");
   const [payRemark, setPayRemark] = useState("");
@@ -33,9 +33,7 @@ export default function OrderDetailsPage() {
     setOrder(data);
   }
 
-  // -----------------------------
-  //  UPDATE STATUS
-  // -----------------------------
+  // เปลี่ยนสถานะ
   async function updateStatus(e) {
     const newStatusId = Number(e.target.value);
 
@@ -48,9 +46,7 @@ export default function OrderDetailsPage() {
     }
   }
 
-  // -----------------------------
-  //  SUBMIT PAYMENT
-  // -----------------------------
+  // บันทึกการจ่ายเงิน
   async function submitPayment() {
     if (!payAmount || Number(payAmount) <= 0) {
       alert("กรุณาใส่ยอดเงินให้ถูกต้อง");
@@ -71,7 +67,7 @@ export default function OrderDetailsPage() {
       setPayAmount("");
       setPayMethod("cash");
       setPayRemark("");
-      loadOrder(); // refresh
+      loadOrder();
     } catch (err) {
       console.error("Payment error:", err);
       alert("Payment failed. Check console.");
@@ -85,145 +81,246 @@ export default function OrderDetailsPage() {
   const totalPaid = order.payments.reduce((s, p) => s + p.amount, 0);
   const remaining = totalAmount - totalPaid;
 
+  const statusName = order.status.status_name;
+  const statusColor = statusColors[statusName] || "#6b7280";
+
+  // style การ์ดแต่ละ block ให้เข้าธีม
+  const sectionCardStyle = {
+    background: "#15151e",
+    borderRadius: "12px",
+    border: "1px solid #262631",
+    boxShadow: "0 18px 40px rgba(0,0,0,0.55)",
+    padding: "16px 20px 18px",
+    marginBottom: "20px",
+  };
+
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Order #{order.order_id}</h1>
+    <div style={{ padding: "24px" }}>
+      {/* หัวข้อ + แถวบน */}
+      <h1 className="page-title" style={{ marginBottom: 8 }}>
+        Order #{order.order_id}
+      </h1>
 
-      {/* CUSTOMER INFO */}
-      <p>
-        <b>Customer:</b> {order.customer.full_name} ({order.customer.phone})
-      </p>
+      <div
+        style={{
+          ...sectionCardStyle,
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        {/* แถวลูกค้า */}
+        <div style={{ fontSize: 14, color: "#cbd5f5" }}>
+          <strong>Customer:</strong>{" "}
+          {order.customer.full_name} ({order.customer.phone})
+        </div>
 
-      {/* STATUS BADGE */}
-      <p>
-        <b>Status: </b>
-        <span
+        {/* แถวสถานะ + dropdown */}
+        <div
           style={{
-            padding: "6px 12px",
-            borderRadius: "6px",
-            background: statusColors[order.status.status_name],
-            color: "white",
-            fontWeight: "bold",
-            marginRight: "10px",
-            textTransform: "capitalize",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 10,
+            alignItems: "center",
+            marginTop: 4,
           }}
         >
-          {order.status.status_name}
-        </span>
+          <span style={{ fontSize: 14, color: "#cbd5f5" }}>
+            <strong>Status:</strong>
+          </span>
 
-        {/* STATUS DROPDOWN */}
-        <select
-          value={order.status.status_id}
-          onChange={updateStatus}
-          style={{ padding: "6px" }}
+          <span
+            style={{
+              padding: "6px 14px",
+              borderRadius: "999px",
+              background: statusColor,
+              color: "#0b1120",
+              fontWeight: 700,
+              textTransform: "capitalize",
+              fontSize: 13,
+            }}
+          >
+            {statusName}
+          </span>
+
+          <select
+            value={order.status.status_id}
+            onChange={updateStatus}
+            style={{
+              padding: "6px 10px",
+              borderRadius: "999px",
+              border: "1px solid #374151",
+              background: "#020617",
+              color: "#e5e7eb",
+              fontSize: 13,
+              marginLeft: "auto",
+              minWidth: 140,
+            }}
+          >
+            {statuses.map((s) => (
+              <option key={s.status_id} value={s.status_id}>
+                {s.status_name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* วันเวลา + note */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            marginTop: 10,
+            fontSize: 13,
+            color: "#9ca3af",
+          }}
         >
-          {statuses.map((s) => (
-            <option key={s.status_id} value={s.status_id}>
-              {s.status_name}
-            </option>
-          ))}
-        </select>
-      </p>
-
-      {/* ORDER DATES */}
-      <p>
-        <b>Dropoff:</b> {order.dropoff_datetime}
-        <br />
-        <b>Pickup Due:</b> {order.pickup_due_datetime}
-        <br />
-        <b>Notes:</b> {order.notes || "-"}
-      </p>
+          <span>
+            <strong>Dropoff:</strong> {order.dropoff_datetime}
+          </span>
+          <span>
+            <strong>Pickup Due:</strong> {order.pickup_due_datetime}
+          </span>
+          <span>
+            <strong>Notes:</strong> {order.notes || "-"}
+          </span>
+        </div>
+      </div>
 
       {/* ITEMS TABLE */}
-      <h3>Items</h3>
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Qty</th>
-            <th>Unit Price</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {order.items.map((i) => (
-            <tr key={i.item_id}>
-              <td>{i.item_desc}</td>
-              <td>{i.qty}</td>
-              <td>{i.unit_price}</td>
-              <td>{i.amount}</td>
+      <div style={sectionCardStyle}>
+        <h3 style={{ marginBottom: 10 }}>Items</h3>
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Amount</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {order.items.map((i) => (
+              <tr key={i.item_id}>
+                <td>{i.item_desc}</td>
+                <td>{i.qty}</td>
+                <td>{i.unit_price}</td>
+                <td>{i.amount}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      {/* TOTALS */}
-      <h4>Total Amount: {totalAmount} บาท</h4>
-      <h4>Total Paid: {totalPaid} บาท</h4>
-      <h4 style={{ color: remaining > 0 ? "red" : "green" }}>
-        Remaining: {remaining} บาท
-      </h4>
+        {/* totals ด้านล่างตาราง */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 10,
+            justifyContent: "flex-end",
+            marginTop: 10,
+            fontSize: 14,
+          }}
+        >
+          <span style={{ color: "#e5e7eb" }}>
+            <strong>Total:</strong> {totalAmount} บาท
+          </span>
+          <span style={{ color: "#a5b4fc" }}>
+            <strong>Paid:</strong> {totalPaid} บาท
+          </span>
+          <span
+            style={{
+              color: remaining > 0 ? "#f97373" : remaining < 0 ? "#4ade80" : "#facc15",
+              fontWeight: 600,
+            }}
+          >
+            <strong>Remaining:</strong> {remaining} บาท
+          </span>
+        </div>
+      </div>
 
-      {/* PAYMENTS TABLE */}
-      <h3>Payments</h3>
-      <table className="table table-bordered">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Method</th>
-            <th>Amount</th>
-            <th>Remark</th>
-          </tr>
-        </thead>
-        <tbody>
-          {order.payments.map((p) => (
-            <tr key={p.payment_id}>
-              <td>{p.pay_datetime}</td>
-              <td>{p.method}</td>
-              <td>{p.amount}</td>
-              <td>{p.remark}</td>
+      {/* PAYMENTS LIST */}
+      <div style={sectionCardStyle}>
+        <h3 style={{ marginBottom: 10 }}>Payments</h3>
+        <table className="table table-bordered">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Method</th>
+              <th>Amount</th>
+              <th>Remark</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {order.payments.map((p) => (
+              <tr key={p.payment_id}>
+                <td>{p.pay_datetime}</td>
+                <td>{p.method}</td>
+                <td>{p.amount}</td>
+                <td>{p.remark}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      {/* ADD PAYMENT */}
-      <h3>Add Payment</h3>
+      {/* ADD PAYMENT FORM */}
+      <div style={sectionCardStyle}>
+        <h3 style={{ marginBottom: 12 }}>Add Payment</h3>
 
-      <label>Amount</label>
-      <input
-        type="number"
-        className="form-control"
-        value={payAmount}
-        onChange={(e) => setPayAmount(e.target.value)}
-      />
+        {/* แถวฟอร์ม 3 ช่องบนจอกว้าง */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 0.8fr 1.4fr",
+            gap: 12,
+            marginBottom: 14,
+          }}
+        >
+          <div>
+            <label style={{ fontSize: 13, color: "#9ca3af" }}>Amount</label>
+            <input
+              type="number"
+              value={payAmount}
+              onChange={(e) => setPayAmount(e.target.value)}
+            />
+          </div>
 
-      <label style={{ marginTop: "10px" }}>Method</label>
-      <select
-        className="form-control"
-        value={payMethod}
-        onChange={(e) => setPayMethod(e.target.value)}
-      >
-        <option value="cash">Cash</option>
-        <option value="transfer">Transfer</option>
-        <option value="qr">QR</option>
-      </select>
+          <div>
+            <label style={{ fontSize: 13, color: "#9ca3af" }}>Method</label>
+            <select
+              value={payMethod}
+              onChange={(e) => setPayMethod(e.target.value)}
+            >
+              <option value="cash">Cash</option>
+              <option value="transfer">Transfer</option>
+              <option value="qr">QR</option>
+            </select>
+          </div>
 
-      <label style={{ marginTop: "10px" }}>Remark</label>
-      <input
-        type="text"
-        className="form-control"
-        value={payRemark}
-        onChange={(e) => setPayRemark(e.target.value)}
-      />
+          <div>
+            <label style={{ fontSize: 13, color: "#9ca3af" }}>Remark</label>
+            <input
+              type="text"
+              value={payRemark}
+              onChange={(e) => setPayRemark(e.target.value)}
+              placeholder="เช่น จ่ายครบ, มัดจำ, โอน KBank ฯลฯ"
+            />
+          </div>
+        </div>
 
-      <button
-        className="btn btn-primary"
-        style={{ marginTop: "15px" }}
-        onClick={submitPayment}
-      >
-        Add Payment
-      </button>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <button className="btn" onClick={submitPayment}>
+            Add Payment
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

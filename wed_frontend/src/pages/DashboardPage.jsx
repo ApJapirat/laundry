@@ -1,17 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { API } from "../services/api";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell,
-  LineChart, Line, ResponsiveContainer
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 
-const COLORS = ["#f1c40f", "#3498db", "#9b59b6", "#e67e22", "#2ecc71", "#7f8c8d"];
+// ==== สีสไตล์ Monkeytype ส้มเข้ม ====
+const MT_COLORS = {
+  bar: "#ffb000",
+  line: "#ffb000",
+  dot: "#ffe06e",
+  grid: "#1a1c23",
+  tooltipBg: "#14161a",
+  tooltipBorder: "#1f2127",
+  pie: ["#ffb000", "#ffc94a", "#ffe06e", "#ffac33", "#ff8a3d", "#ffd24a"],
+};
+
+// สไตล์กรอบการ์ดของกราฟ (ใช้เฉพาะในหน้านี้ ไม่ไปยุ่งหน้าอื่น)
+const chartCardStyle = {
+  background: "#15151e",
+  borderRadius: "10px",
+  border: "1px solid #262631",
+  padding: "16px 18px",
+  boxShadow: "0 12px 24px rgba(0,0,0,0.45)",
+};
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState(null);
   const [ordersByStatus, setOrdersByStatus] = useState([]);
   const [revenue7, setRevenue7] = useState([]);
-
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
@@ -25,7 +52,9 @@ export default function DashboardPage() {
 
   const pendingOrders = orders.filter((o) => o.status_id === 1);
   const today = new Date().toISOString().slice(0, 10);
-  const todayPickup = orders.filter((o) => o.pickup_due_datetime.startsWith(today));
+  const todayPickup = orders.filter((o) =>
+    o.pickup_due_datetime.startsWith(today)
+  );
 
   return (
     <div style={{ padding: "20px" }}>
@@ -47,51 +76,142 @@ export default function DashboardPage() {
       {/* CHARTS */}
       <div style={{ display: "flex", marginTop: "40px", gap: "40px" }}>
         {/* Bar Chart */}
-        <div style={{ width: "45%", height: 300 }}>
-          <h3>Orders by Status</h3>
-          <ResponsiveContainer>
-            <BarChart data={ordersByStatus}>
-              <XAxis dataKey="status" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" fill="#3498db" />
-            </BarChart>
-          </ResponsiveContainer>
+        <div style={{ width: "45%" }}>
+          <div style={chartCardStyle}>
+            <h3 style={{ marginBottom: 10, color: "#8f95a2", fontSize: 14 }}>
+              Orders by Status
+            </h3>
+            <div style={{ width: "100%", height: 260 }}>
+              <ResponsiveContainer>
+                <BarChart data={ordersByStatus}>
+                  <CartesianGrid
+                    stroke={MT_COLORS.grid}
+                    strokeDasharray="3 3"
+                  />
+
+                  <XAxis
+                    dataKey="status"
+                    tick={{ fill: "#8f95a2", fontSize: 11 }}
+                  />
+                  <YAxis tick={{ fill: "#8f95a2", fontSize: 11 }} />
+
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: MT_COLORS.tooltipBg,
+                      border: `1px solid ${MT_COLORS.tooltipBorder}`,
+                      borderRadius: 8,
+                      color: "#f9fafb",
+                    }}
+                    labelStyle={{ color: "#f9fafb" }}
+                    itemStyle={{ color: "#f9fafb" }}
+                  />
+
+                  <Bar
+                    dataKey="count"
+                    fill={MT_COLORS.bar}
+                    radius={[6, 6, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
 
         {/* Pie Chart */}
-        <div style={{ width: "45%", height: 300 }}>
-          <h3>Status Distribution</h3>
-          <ResponsiveContainer>
-            <PieChart>
-              <Pie
-                data={ordersByStatus}
-                dataKey="count"
-                nameKey="status"
-                outerRadius={110}
-                label
-              >
-                {ordersByStatus.map((_, idx) => (
-                  <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+        <div style={{ width: "45%" }}>
+          <div style={chartCardStyle}>
+            <h3 style={{ marginBottom: 10, color: "#8f95a2", fontSize: 14 }}>
+              Status Distribution
+            </h3>
+            <div style={{ width: "100%", height: 260 }}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={ordersByStatus}
+                    dataKey="count"
+                    nameKey="status"
+                    outerRadius={110}
+                    paddingAngle={3}
+                    label={({ name, value }) => `${name} (${value})`}
+                    labelLine={false}
+                  >
+                    {ordersByStatus.map((_, idx) => (
+                      <Cell
+                        key={idx}
+                        fill={MT_COLORS.pie[idx % MT_COLORS.pie.length]}
+                      />
+                    ))}
+                  </Pie>
+
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: MT_COLORS.tooltipBg,
+                      border: `1px solid ${MT_COLORS.tooltipBorder}`,
+                      borderRadius: 8,
+                      color: "#f9fafb",
+                    }}
+                    labelStyle={{ color: "#f9fafb" }}
+                    itemStyle={{ color: "#f9fafb" }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Line Chart */}
-      <div style={{ width: "100%", height: 300, marginTop: "40px" }}>
-        <h3>Revenue (Last 7 Days)</h3>
-        <ResponsiveContainer>
-          <LineChart data={revenue7}>
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Line dataKey="amount" stroke="#2ecc71" strokeWidth={3} />
-          </LineChart>
-        </ResponsiveContainer>
+      <div style={{ width: "100%", marginTop: "40px" }}>
+        <div style={chartCardStyle}>
+          <h3 style={{ marginBottom: 10, color: "#8f95a2", fontSize: 14 }}>
+            Revenue (Last 7 Days)
+          </h3>
+          <div style={{ width: "100%", height: 260 }}>
+            <ResponsiveContainer>
+              <LineChart data={revenue7}>
+                <CartesianGrid
+                  stroke={MT_COLORS.grid}
+                  strokeDasharray="3 3"
+                />
+
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: "#8f95a2", fontSize: 11 }}
+                />
+                <YAxis tick={{ fill: "#8f95a2", fontSize: 11 }} />
+
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: MT_COLORS.tooltipBg,
+                    border: `1px solid ${MT_COLORS.tooltipBorder}`,
+                    borderRadius: 8,
+                    color: "#f9fafb",
+                  }}
+                  labelStyle={{ color: "#f9fafb" }}
+                  itemStyle={{ color: "#f9fafb" }}
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="amount"
+                  stroke={MT_COLORS.line}
+                  strokeWidth={2.2}
+                  dot={{
+                    r: 2,
+                    stroke: MT_COLORS.dot,
+                    strokeWidth: 1,
+                    fill: MT_COLORS.dot,
+                  }}
+                  activeDot={{
+                    r: 4,
+                    fill: MT_COLORS.dot,
+                    stroke: MT_COLORS.dot,
+                  }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
       {/* TABLES */}
@@ -104,20 +224,23 @@ export default function DashboardPage() {
   );
 }
 
+// ==== Card & Table (แบบเดิม) ====
 function Card({ title, value }) {
   return (
     <div
       style={{
-        background: "#fff",
+        background: "#15151e",
         padding: "20px",
         borderRadius: "10px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        boxShadow: "0 12px 24px rgba(0,0,0,0.45)",
         width: "180px",
         textAlign: "center",
+        border: "1px solid #262631",
+        color: "#e5e5ea",
       }}
     >
-      <h4>{title}</h4>
-      <h2>{value}</h2>
+      <h4 style={{ marginBottom: 8, color: "#8f95a2" }}>{title}</h4>
+      <h2 style={{ margin: 0, color: "#ffb000" }}>{value}</h2>
     </div>
   );
 }
